@@ -1,11 +1,3 @@
-[![Build Status](https://travis-ci.org/abdennour/react-csv.svg?branch=master)](https://travis-ci.org/abdennour/react-csv)
-[![Coverage Status](https://coveralls.io/repos/github/abdennour/react-csv/badge.svg?branch=master)](https://coveralls.io/github/abdennour/react-csv?branch=master)
-
-![](https://raw.githubusercontent.com/rathath/bucket/master/img/react-csv.png)
-
-[![Build Status](https://travis-ci.org/abdennour/react-csv.svg?branch=master)](https://travis-ci.org/abdennour/react-csv)
-[![Coverage Status](https://coveralls.io/repos/github/abdennour/react-csv/badge.svg?branch=master)](https://coveralls.io/github/abdennour/react-csv?branch=master)
-
 # Overview :
 
 Generate CSV document  according to given data.
@@ -222,12 +214,3 @@ For non-node developers, they have to use CDN version :
 - `npm start` runs the [`sample-site`](sample-site/)
 
 - `npm run docgen` generates documentation in HTML output.
-
-- `npm run cdn` generate a bundle to be used as CDN
-
-
-# Donation
-
-If this project help you reduce time to develop, you can give me a cup of coffee 🍵 :)
-
-[![paypal](https://www.paypalobjects.com/en_US/i/btn/btn_donateCC_LG.gif)](https://www.paypal.me/AbdennourT/2)
