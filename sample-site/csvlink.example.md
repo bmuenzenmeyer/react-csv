@@ -103,3 +103,26 @@ const headers =['Rando-🍌', 'Rando-🍑', 'Rando-🌺', 'Rando-🍀'];
 
 <CSVLink data={randomData} headers={headers}>Download with Headers </CSVLink>
 ```
+
+**Kitchen Sink**  :
+
+* Headers
+* Custom Delimiter
+* Data contains delimiter - which is replaced with a space
+* Data contains new lines - which are stripped out
+
+```
+//It is editable content : you can change code and see results on live.
+const headers =['First', 'Last', 'Contact'];
+
+const data = [
+  ['Dagny', 'Taggart' , 'dagny.taggart@example.com\r\ndirector.tt@example.com'] ,
+  ['James', 'Taggart' , 'james.targgart@example.com'] ,
+  ['Hank','Reardon', 'hank.reardon@example.com'],
+  ['John','Galt', 'john.galt@example.com;atlas@example.com;prime-mover57@example.com']
+];
+
+<span>
+Download <CSVLink data={data} headers={headers} separator={";"}>CSV ⬇</CSVLink>
+</span>
+```

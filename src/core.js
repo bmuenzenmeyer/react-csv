@@ -26,8 +26,14 @@ export const jsons2arrays = (jsons, headers) => {
   return [headerLabels, ...data];
 };
 
-export const joiner = ((data,separator = ',') =>
- data.map((row, index) => row.map((element) => "\"" + element + "\"").join(separator)).join(`\n`)
+export const joiner = ((data, separator) =>
+ data.map((row, index) => row.map(
+   (element) => {
+     const delimiterRegex = new RegExp(separator, 'g');
+     element = typeof element === 'string' ? element.trim().replace(/\r?\n|\r/g,' ') : element;
+     return "\"" + element ? (typeof element === 'string' && element.indexOf(separator) > -1 ? element.replace(delimiterRegex, ' ') : element) : '' + "\""
+    }
+  ).join(separator)).join(`\n`)
 );
 
 export const arrays2csv = ((data, headers, separator) =>
@@ -43,13 +49,14 @@ export const string2csv = ((data, headers, separator) =>
 );
 
 export const toCSV = (data, headers, separator) => {
- if (isJsons(data)) return jsons2csv(data, headers, separator);
- if (isArrays(data)) return arrays2csv(data, headers, separator);
- if (typeof data ==='string') return string2csv(data, headers, separator);
+ let base = `sep=${separator}\n`;
+ if (isJsons(data)) return base + jsons2csv(data, headers, separator);
+ if (isArrays(data)) return base + arrays2csv(data, headers, separator);
+ if (typeof data ==='string') return base + string2csv(data, headers, separator);
  throw new TypeError(`Data should be a "String", "Array of arrays" OR "Array of objects" `);
 };
 
-export const buildURI = ((data, headers, separator) => encodeURI(
+export const buildURI = ((data, headers, separator = ',') => encodeURI(
   `data:text/csv;charset=utf-8,\uFEFF${toCSV(data, headers, separator)}`
  )
 );
