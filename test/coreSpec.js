@@ -146,13 +146,13 @@ describe(`core::arrays2csv`, () => {
   it(`converts Array of arrays to string in CSV format`, () => {
     const actual = arrays2csv(fixtures);
     expect(actual).toBeA('string');
-    expect(actual.split(`\n`).join(`|`)).toEqual(`"a","b"|"c","d"`);
+    expect(actual.split(`\n`).join(`|`)).toEqual(`a,b|c,d`);
   });
 
   it(`renders  CSV headers whenever it was given `, () => {
     const headers = [`X`, `Y`];
     const firstLineOfCSV = arrays2csv(fixtures, headers).split(`\n`)[0];
-    expect(firstLineOfCSV).toEqual(`"X","Y"`);
+    expect(firstLineOfCSV).toEqual(`X,Y`);
   });
 });
 
@@ -171,9 +171,9 @@ describe(`core::jsons2csv`, () => {
   });
 
   it(`converts Array of literal objects to string in CSV format including headers`, () => {
-    const actual = jsons2csv(fixtures);
+    const actual = jsons2csv(fixtures, null, ',');
     const expectedHeaders = ['X', 'Y'];
-    const expected = `"X","Y"|"88","97"|"77","99"`;
+    const expected = `X,Y|88,97|77,99`;
 
     expect(actual).toBeA('string');
     expect(actual.split(`\n`).join(`|`)).toEqual(expected);
@@ -182,10 +182,9 @@ describe(`core::jsons2csv`, () => {
  it(`renders CSV string according to order of given headers`, () => {
    let fixtures =[{X:'12', Y:'bb'}, {Y:'ee', X:'55'}]
    const headers = ['Y', 'X', 'Z'];
-   const actual = jsons2csv(fixtures, headers);
-   expect(actual.startsWith(`"Y","X","Z"`)).toBeTruthy();
-   expect(actual.endsWith(`"ee","55",""`)).toBeTruthy();
-
+   const actual = jsons2csv(fixtures, headers, ',');
+   expect(actual.startsWith(`Y,X,Z`)).toBeTruthy();
+   expect(actual.endsWith(`ee,55,`)).toBeTruthy();
  });
 
   it(`converts Array of literal objects to string in CSV format including custom header labels`, () => {
@@ -194,11 +193,11 @@ describe(`core::jsons2csv`, () => {
       {label: 'Letter Y', key: 'Y'}
     ];
 
-    const actual = jsons2csv(fixtures, customHeaders);
+    const actual = jsons2csv(fixtures, customHeaders, ',');
 
     expect(actual).toBeA('string');
-    expect(actual.startsWith(`"Letter X","Letter Y"`)).toBeTruthy();
-    expect(actual.endsWith(`"77","99"`)).toBeTruthy();
+    expect(actual.startsWith(`Letter X,Letter Y`)).toBeTruthy();
+    expect(actual.endsWith(`77,99`)).toBeTruthy();
   });
 
 });
@@ -244,7 +243,13 @@ describe(`core::toCSV`, () =>{
 describe(`core::buildURI`, () =>{
   let fixtures;
   beforeEach(() => {
-   fixtures = {string:'Xy', arrays:[['a', 'b'],['c', 'd']],jsons:[{}, {}]};
+   fixtures = {
+     string:'Xy', 
+     arrays:[['a', 'b'],['c', 'd']],
+     jsons:[{}, {}],
+     delimiterObjects: [{id: '1', name:'one,'}, {id: '2', name: 'two,and three'}],
+     newlineObjects: [{id: '1', name:'one'}, {id: '2', name: 'two\r\nand three'}]
+    };
   });
 
   it(`generates URI to download data in CSV format`,() => {
@@ -256,20 +261,44 @@ describe(`core::buildURI`, () =>{
   });
 
   it(`generates CSV string according to "separator"`, () => {
-    const prefixCsvURI= `data:text/csv;charset=utf-8,\uFEFF,`;
-    const expectedSepartorCount = fixtures.arrays.map(row => row.length -1).reduce((total, next) =>total + next, 0);
+
+    const expectedDefaultString = `data:text/csv;charset=utf-8,\uFEFFsep=,\na,b\nc,d`;
+    let fullURI = buildURI(fixtures.arrays);
+    expect(fullURI).toEqual(encodeURI(expectedDefaultString));
+    
+    const expectedCustomDelimiterString = `data:text/csv;charset=utf-8,\uFEFFsep=;\na;b\nc;d`;
     let separator = ';';
-    let fullURI = buildURI(fixtures.arrays, null , separator);
-
-    expect(
-      fullURI.slice(prefixCsvURI.length).match(/;/g).length
-    ).toEqual(expectedSepartorCount);
-
-    separator = ':'; // any separator
-    fullURI = buildURI(fixtures.arrays, null , separator);
-    expect(
-      fullURI.slice(prefixCsvURI.length).match(/:/g).length
-    ).toEqual(expectedSepartorCount);
-
+    fullURI = buildURI(fixtures.arrays, undefined, separator);
+    expect(fullURI).toEqual(encodeURI(expectedCustomDelimiterString));
   });
+
+  it('generates CSV string with delimiter in data', () => {
+    const headers = [
+      {label: 'ID', key: 'id'},
+      {label: 'Name', key: 'name'}
+    ]
+    const expected = `data:text/csv;charset=utf-8,\uFEFFsep=,\nID,Name\n1,one \n2,two and three`;
+    let fullURI = buildURI(fixtures.delimiterObjects, headers, ',');
+    expect(fullURI).toEqual(encodeURI(expected));
+  })
+
+  it('generates CSV string with delimiter in data', () => {
+    const headers = [
+      {label: 'ID', key: 'id'},
+      {label: 'Name', key: 'name'}
+    ]
+    const expected = `data:text/csv;charset=utf-8,\uFEFFsep=,\nID,Name\n1,one \n2,two and three`;
+    let fullURI = buildURI(fixtures.delimiterObjects, headers, ',');
+    expect(fullURI).toEqual(encodeURI(expected));
+  })  
+
+  it('generates CSV string with newline in data', () => {
+    const headers = [
+      {label: 'ID', key: 'id'},
+      {label: 'Name', key: 'name'}
+    ]
+    const expected = `data:text/csv;charset=utf-8,\uFEFFsep=,\nID,Name\n1,one\n2,two and three`;
+    let fullURI = buildURI(fixtures.newlineObjects, headers, ',');
+    expect(fullURI).toEqual(encodeURI(expected));
+  })    
 });
